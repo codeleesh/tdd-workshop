@@ -143,10 +143,14 @@ classDiagram
 
 ### 6.1 빈 장바구니에서 청구서 요청 시 예외 발생 테스트 추가
 
-가장 단순한 degenerate case 테스트 구현 완료
-- 빈 리스트로 POST 요청 시 400 Bad Request 응답 검증
-- IllegalArgumentException 발생 및 GlobalExceptionHandler로 처리
-- 최소한의 검증 로직만 추가하여 테스트 성공
+TDD Red-Green-Refactor 사이클 적용
+- **Red**: 실패하는 테스트 먼저 작성 (빈 리스트 POST 시 BadRequest 기대)
+- **Green**: 최소한의 코드로 테스트 성공 (빈 장바구니 검증 로직 + GlobalExceptionHandler)
+- **Refactor**: 중복 없어서 리팩터링 불필요
+
+구현한 최소한의 코드:
+- request.items().isEmpty() 체크 후 IllegalArgumentException 발생
+- @RestControllerAdvice로 예외를 BadRequest로 변환
 
 ## 7. **High Level Test 활성화**
 

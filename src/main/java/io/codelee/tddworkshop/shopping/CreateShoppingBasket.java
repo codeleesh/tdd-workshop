@@ -18,6 +18,11 @@ public class CreateShoppingBasket {
     @PostMapping
     @Transactional
     public BasketResponse createBasket(@RequestBody BasketItemRequests request) {
+        // 빈 장바구니 체크 - 테스트를 성공시키기 위한 최소한의 코드
+        if (request.items().isEmpty()) {
+            throw new IllegalArgumentException("장바구니가 비어있습니다.");
+        }
+        
         // 최소한의 구현 - 하드코딩으로 테스트 성공시키기
         List<BasketItem> items = List.of(
             new BasketItem("충전 케이블", BigDecimal.valueOf(8000), 1, BigDecimal.valueOf(8000))
