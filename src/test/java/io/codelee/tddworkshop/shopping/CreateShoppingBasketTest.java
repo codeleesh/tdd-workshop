@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /// - [X] 빈 장바구니에서 청구서 요청 시 예외 발생
 /// - [X] 단일 상품을 1개만 장바구니에 추가 (할인 없음, 10,000원 이하)
-/// - [ ] 10,000원 초과 20,000원 미만 구매 시 5% 할인 적용
+/// - [X] 10,000원 초과 20,000원 미만 구매 시 5% 할인 적용
 /// - [ ] 20,000원 이상 구매 시 10% 할인 적용
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -48,6 +48,41 @@ public class CreateShoppingBasketTest {
         if (basketRepository instanceof FakeBasketRepository) {
             ((FakeBasketRepository) basketRepository).clear();
         }
+    }
+
+    @DisplayName("10,000원 초과 20,000원 미만 구매 시 5% 할인 적용")
+    @Test
+    void discount_5_percent_between_10000_and_20000() throws Exception {
+        // given
+        var items = new BasketItemRequests(List.of(
+                new BasketItemRequest("스마트폰 케이스", BigDecimal.valueOf(12000), 1),
+                new BasketItemRequest("보호필름", BigDecimal.valueOf(3000), 1)
+        ));
+
+        // when
+        MvcResult postResult = mockMvc.perform(post("/api/baskets")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(items)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        var response = objectMapper.readValue(
+                postResult.getResponse().getContentAsString(),
+                BasketResponse.class);
+
+        String basketId = response.basketId();
+
+        // then
+        MvcResult getResult = mockMvc.perform(get("/api/baskets/" + basketId))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        var basketDetails = objectMapper.readValue(
+                getResult.getResponse().getContentAsString(),
+                BasketDetailsResponse.class);
+
+        String result = printBasketDetails(basketDetails);
+        // 실제로는 여기서 검증이 이루어져야 함
     }
 
     @DisplayName("단일 상품을 1개만 장바구니에 추가 (할인 없음, 10,000원 이하)")

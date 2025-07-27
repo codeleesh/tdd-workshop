@@ -60,9 +60,15 @@ public class CreateShoppingBasket {
                 .map(BasketItem::getTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         
-        // 할인 계산 (10,000원 이하는 할인 없음)
+        // 할인 계산
         BigDecimal discount = BigDecimal.ZERO;
-        BigDecimal finalAmount = subtotal;
+        if (subtotal.compareTo(BigDecimal.valueOf(10000)) > 0 && 
+            subtotal.compareTo(BigDecimal.valueOf(20000)) < 0) {
+            // 10,000원 초과 20,000원 미만: 5% 할인
+            discount = subtotal.multiply(BigDecimal.valueOf(0.05));
+        }
+        
+        BigDecimal finalAmount = subtotal.subtract(discount);
         
         return new BasketDetailsResponse(
             basketId,
