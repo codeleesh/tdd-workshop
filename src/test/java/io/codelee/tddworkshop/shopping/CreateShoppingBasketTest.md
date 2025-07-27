@@ -177,10 +177,10 @@ classDiagram
 ## 8. **Jpa Repository 구현**
 
 ### Jpa Repository 구현 완료
-- Entity와 Value Object에 대해서 JPA 매핑 작성
-- BasketRepositoryJpa 인터페이스 생성 (JpaRepository 상속)
-- BasketRepositoryImpl 클래스 작성 (BasketRepository 구현, BasketRepositoryJpa 위임)
-- 테스트의 @TestConfiguration 부분 커멘트 처리하여 BasketRepositoryImpl 사용
+- Entity와 Value Object에 대해서 JPA 매핑 작성 (누락된 어노테이션 추가)
+- BasketRepositoryJpa 직접 사용하도록 구조 간소화
+- 불필요한 BasketRepository 인터페이스와 BasketRepositoryImpl 제거
+- Entity 간 연관관계 설정 (@OneToMany, @ManyToOne, setBasket 메서드) 추가
 
 ### JPA 테스트 실행을 위한 문제 해결
 - FakeRepository 관련 코드 완전 제거 (주석 처리된 코드, basketRepository 필드 등)
@@ -194,29 +194,10 @@ classDiagram
 
 ```mermaid
 classDiagram
-    class BasketRepository {
-        <<interface>>
-        +save(Basket) Basket
-        +findById(Long) Optional~Basket~
-    }
-    
-    class BasketRepositoryImpl {
-        -BasketRepositoryJpa basketRepositoryJpa
-        +save(Basket) Basket
-        +findById(Long) Optional~Basket~
-    }
-    
     class BasketRepositoryJpa {
         <<interface>>
         +extends JpaRepository~Basket, Long~
-    }
-    
-    class FakeBasketRepository {
-        -Map~Long, Basket~ baskets
-        -AtomicLong idGenerator
-        +save(Basket) Basket
         +findById(Long) Optional~Basket~
-        +clear() void
     }
     
     class JpaRepository {
@@ -225,10 +206,14 @@ classDiagram
         +findById(ID) Optional~T~
     }
     
-    BasketRepository <|.. BasketRepositoryImpl : implements
-    BasketRepository <|.. FakeBasketRepository : implements
+    class CreateShoppingBasket {
+        -BasketRepositoryJpa basketRepository
+        +createBasket(BasketItemRequests) BasketResponse
+        +getBasket(String) BasketDetailsResponse
+    }
+    
     BasketRepositoryJpa <|-- JpaRepository : extends
-    BasketRepositoryImpl --> BasketRepositoryJpa : uses
+    CreateShoppingBasket --> BasketRepositoryJpa : uses
 ```
 
 ## 9. **테스트 코드 리팩토링 (DSL 및 중복 제거)**
@@ -260,5 +245,3 @@ classDiagram
 - 동적 영수증 생성으로 각 테스트의 실제 데이터 검증
 - 천 단위 구분자와 할인율 계산 추가로 가독성 향상
 - 메서드가 전달받은 인자를 실제로 검증하고 활용하는 의미있는 구현
-
-## 9. **테스트 코드 리팩토링**

@@ -9,9 +9,9 @@ import java.util.List;
 @RequestMapping("/api/baskets")
 public class CreateShoppingBasket {
     
-    private final BasketRepository basketRepository;
+    private final BasketRepositoryJpa basketRepository;
     
-    public CreateShoppingBasket(BasketRepository basketRepository) {
+    public CreateShoppingBasket(BasketRepositoryJpa basketRepository) {
         this.basketRepository = basketRepository;
     }
     

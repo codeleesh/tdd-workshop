@@ -1,8 +1,1 @@
-package io.codelee.tddworkshop.shopping;
-
-import java.util.Optional;
-
-public interface BasketRepository {
-    Basket save(Basket basket);
-    Optional<Basket> findById(Long id);
-}
+// 이 파일은 더 이상 필요하지 않음 - JpaRepository 직접 사용
