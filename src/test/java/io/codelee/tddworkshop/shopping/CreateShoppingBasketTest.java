@@ -70,7 +70,7 @@ public class CreateShoppingBasketTest {
 
         // when & then
         BasketDetailsResponse basketDetails = basketApi.getBasketDetails(basketId);
-        String result = printBasketDetails(basketDetails);
+        Approvals.verify(printBasketDetails(basketDetails));
     }
 
     @DisplayName("10,000원 초과 20,000원 미만 구매 시 5% 할인 적용")
@@ -85,7 +85,7 @@ public class CreateShoppingBasketTest {
 
         // when & then
         BasketDetailsResponse basketDetails = basketApi.getBasketDetails(basketId);
-        String result = printBasketDetails(basketDetails);
+        Approvals.verify(printBasketDetails(basketDetails));
     }
 
     @DisplayName("20,000원 이상 구매 시 10% 할인 적용")
@@ -100,7 +100,7 @@ public class CreateShoppingBasketTest {
 
         // when & then
         BasketDetailsResponse basketDetails = basketApi.getBasketDetails(basketId);
-        String result = printBasketDetails(basketDetails);
+        Approvals.verify(printBasketDetails(basketDetails));
     }
 
     @DisplayName("엔드-투-엔드 기능 구현: UI부터 데이터베이스까지 전체 시스템을 관통하는 기본적인 흐름 포함")
@@ -113,7 +113,7 @@ public class CreateShoppingBasketTest {
 
         // when & then
         BasketDetailsResponse basketDetails = basketApi.getBasketDetails(basketId);
-        String result = printBasketDetails(basketDetails);
+        Approvals.verify(printBasketDetails(basketDetails));
     }
 
     @DisplayName("여러 상품이 있고 20,000원에서 10% 할인 적용되는 청구서 생성")
@@ -135,18 +135,34 @@ public class CreateShoppingBasketTest {
      * 영수증을 출력하는 메소드
      */
     private String printBasketDetails(BasketDetailsResponse basketDetails) {
-        // 실제 구현에서는 basketDetails의 내용을 사용하겠지만,
-        // 지금은 하드코딩으로 테스트가 성공하도록 함
-        return """
-                ===== 영수증 =====
-                품목:
-                - 스마트폰 케이스 1개 (단가: 15,000원, 총액: 15,000원)
-                - 보호필름 1개 (단가: 5,000원, 총액: 5,000원)
-                소계: 20,000원
-                할인: 2,000원 (10% 할인)
-                최종 결제 금액: 18,000원
-                ==================
-                """;
+        StringBuilder receipt = new StringBuilder();
+        receipt.append("===== 영수증 =====\n");
+        receipt.append("품목:\n");
+        
+        // 실제 basketDetails의 items를 사용
+        for (BasketItemDto item : basketDetails.items()) {
+            receipt.append(String.format("- %s %d개 (단가: %,d원, 총액: %,d원)\n", 
+                item.name(), 
+                item.quantity(), 
+                item.price().intValue(), 
+                item.total().intValue()));
+        }
+        
+        receipt.append(String.format("소계: %,d원\n", basketDetails.subtotal().intValue()));
+        
+        if (basketDetails.discount().compareTo(BigDecimal.ZERO) > 0) {
+            // 할인율 계산 (5% 또는 10%)
+            double discountRate = basketDetails.discount().doubleValue() / basketDetails.subtotal().doubleValue() * 100;
+            receipt.append(String.format("할인: %,d원 (%.0f%% 할인)\n", 
+                basketDetails.discount().intValue(), discountRate));
+        } else {
+            receipt.append("할인: 0원 (할인 없음)\n");
+        }
+        
+        receipt.append(String.format("최종 결제 금액: %,d원\n", basketDetails.finalAmount().intValue()));
+        receipt.append("==================");
+        
+        return receipt.toString();
     }
 
     // DTO record들 - CreateShoppingBasket의 inner record로 작성
