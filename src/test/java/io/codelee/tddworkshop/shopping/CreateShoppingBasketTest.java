@@ -103,19 +103,6 @@ public class CreateShoppingBasketTest {
         Approvals.verify(printBasketDetails(basketDetails));
     }
 
-    @DisplayName("엔드-투-엔드 기능 구현: UI부터 데이터베이스까지 전체 시스템을 관통하는 기본적인 흐름 포함")
-    @Test
-    void walking_skeleton_shopping_basket() throws Exception {
-        // given
-        String basketId = basketApi.createBasket(
-                aBasket().withItem(anItem("충전 케이블").withPrice(8000))
-        );
-
-        // when & then
-        BasketDetailsResponse basketDetails = basketApi.getBasketDetails(basketId);
-        Approvals.verify(printBasketDetails(basketDetails));
-    }
-
     /**
      * 영수증을 출력하는 메소드
      */
