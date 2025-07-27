@@ -26,7 +26,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/// - [ ] 빈 장바구니에서 청구서 요청 시 예외 발생
+/// - [X] 빈 장바구니에서 청구서 요청 시 예외 발생
 /// - [ ] 단일 상품을 1개만 장바구니에 추가 (할인 없음, 10,000원 이하)
 /// - [ ] 10,000원 초과 20,000원 미만 구매 시 5% 할인 적용
 /// - [ ] 20,000원 이상 구매 시 10% 할인 적용
@@ -48,6 +48,19 @@ public class CreateShoppingBasketTest {
         if (basketRepository instanceof FakeBasketRepository) {
             ((FakeBasketRepository) basketRepository).clear();
         }
+    }
+
+    @DisplayName("빈 장바구니에서 청구서 요청 시 예외 발생")
+    @Test
+    void empty_basket_throws_exception_when_requesting_receipt() throws Exception {
+        // given: 빈 장바구니
+        var emptyBasket = new BasketItemRequests(List.of());
+
+        // when & then: 예외 발생 검증
+        mockMvc.perform(post("/api/baskets")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(emptyBasket)))
+                .andExpect(status().isBadRequest());
     }
 
     @DisplayName("엔드-투-엔드 기능 구현: UI부터 데이터베이스까지 전체 시스템을 관통하는 기본적인 흐름 포함")
@@ -128,7 +141,7 @@ public class CreateShoppingBasketTest {
      * 영수증을 출력하는 메소드
      */
     private String printBasketDetails(BasketDetailsResponse basketDetails) {
-        // 실제 구현에서는 basketDetails의 내용을 사용하겠지만, 
+        // 실제 구현에서는 basketDetails의 내용을 사용하겠지만,
         // 지금은 하드코딩으로 테스트가 성공하도록 함
         return """
                 ===== 영수증 =====
@@ -146,8 +159,8 @@ public class CreateShoppingBasketTest {
     public record BasketItemRequests(List<BasketItemRequest> items) {}
     public record BasketItemRequest(String name, BigDecimal price, int quantity) {}
     public record BasketResponse(String basketId) {}
-    public record BasketDetailsResponse(String basketId, List<BasketItemDto> items, 
-                                       BigDecimal subtotal, BigDecimal discount, BigDecimal finalAmount) {}
+    public record BasketDetailsResponse(String basketId, List<BasketItemDto> items,
+                                        BigDecimal subtotal, BigDecimal discount, BigDecimal finalAmount) {}
     public record BasketItemDto(String name, int quantity, BigDecimal price, BigDecimal total) {}
 
     @TestConfiguration
@@ -184,3 +197,4 @@ public class CreateShoppingBasketTest {
         }
     }
 }
+
