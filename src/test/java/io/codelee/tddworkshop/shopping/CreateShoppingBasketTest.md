@@ -148,9 +148,15 @@ TDD Red-Green-Refactor 사이클 적용
 - **Green**: 최소한의 코드로 테스트 성공 (빈 장바구니 검증 로직 + GlobalExceptionHandler)
 - **Refactor**: 중복 없어서 리팩터링 불필요
 
-구현한 최소한의 코드:
-- request.items().isEmpty() 체크 후 IllegalArgumentException 발생
-- @RestControllerAdvice로 예외를 BadRequest로 변환
+### 6.2 단일 상품을 1개만 장바구니에 추가 (할인 없음, 10,000원 이하) 테스트 추가
+
+TDD Red-Green-Refactor 사이클 적용
+- **Red**: 실패하는 테스트 작성 (보호필름 5,000원 1개, 할인 없음 케이스)
+- **Green**: 최소한의 코드로 테스트 성공
+  - 하드코딩에서 실제 요청 데이터 사용으로 변경
+  - 실제 basket 데이터 기반 응답 생성
+  - 10,000원 이하 할인 없음 로직 구현
+- **Refactor**: 중복 없어서 리팩터링 불필요
 
 ## 7. **High Level Test 활성화**
 

@@ -23,10 +23,15 @@ public class CreateShoppingBasket {
             throw new IllegalArgumentException("장바구니가 비어있습니다.");
         }
         
-        // 최소한의 구현 - 하드코딩으로 테스트 성공시키기
-        List<BasketItem> items = List.of(
-            new BasketItem("충전 케이블", BigDecimal.valueOf(8000), 1, BigDecimal.valueOf(8000))
-        );
+        // 실제 요청 데이터 사용 - 두 번째 테스트를 성공시키기 위한 최소한의 변경
+        List<BasketItem> items = request.items().stream()
+                .map(item -> new BasketItem(
+                        item.name(), 
+                        item.price(), 
+                        item.quantity(), 
+                        item.price().multiply(BigDecimal.valueOf(item.quantity()))
+                ))
+                .toList();
         
         Basket basket = new Basket(items);
         Basket savedBasket = basketRepository.save(basket);
@@ -37,20 +42,34 @@ public class CreateShoppingBasket {
     @GetMapping("/{basketId}")
     @Transactional(readOnly = true)
     public BasketDetailsResponse getBasket(@PathVariable String basketId) {
-        // 최소한의 구현 - 하드코딩으로 테스트 성공시키기
         Long id = Long.valueOf(basketId);
         Basket basket = basketRepository.findById(id).orElseThrow();
         
-        List<BasketItemDto> itemDtos = List.of(
-            new BasketItemDto("충전 케이블", 1, BigDecimal.valueOf(8000), BigDecimal.valueOf(8000))
-        );
+        // 실제 basket 데이터 사용
+        List<BasketItemDto> itemDtos = basket.getItems().stream()
+                .map(item -> new BasketItemDto(
+                        item.getName(), 
+                        item.getQuantity(), 
+                        item.getPrice(), 
+                        item.getTotal()
+                ))
+                .toList();
+        
+        // 소계 계산
+        BigDecimal subtotal = basket.getItems().stream()
+                .map(BasketItem::getTotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        // 할인 계산 (10,000원 이하는 할인 없음)
+        BigDecimal discount = BigDecimal.ZERO;
+        BigDecimal finalAmount = subtotal;
         
         return new BasketDetailsResponse(
             basketId,
             itemDtos,
-            BigDecimal.valueOf(8000),
-            BigDecimal.ZERO,
-            BigDecimal.valueOf(8000)
+            subtotal,
+            discount,
+            finalAmount
         );
     }
     
