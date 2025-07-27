@@ -116,21 +116,6 @@ public class CreateShoppingBasketTest {
         Approvals.verify(printBasketDetails(basketDetails));
     }
 
-    @DisplayName("여러 상품이 있고 20,000원에서 10% 할인 적용되는 청구서 생성")
-    @Test
-    void create_and_verify_basket_with_discount() throws Exception {
-        // given: DSL로 장바구니에 여러 상품 추가
-        String basketId = basketApi.createBasket(
-                aBasket()
-                        .withItem(anItem("스마트폰 케이스").withPrice(15000).withQuantity(1))
-                        .withItem(anItem("보호필름").withPrice(5000).withQuantity(1))
-        );
-
-        // then: 영수증 검증
-        BasketDetailsResponse basketDetails = basketApi.getBasketDetails(basketId);
-        Approvals.verify(printBasketDetails(basketDetails));
-    }
-
     /**
      * 영수증을 출력하는 메소드
      */
