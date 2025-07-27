@@ -182,6 +182,14 @@ classDiagram
 - BasketRepositoryImpl 클래스 작성 (BasketRepository 구현, BasketRepositoryJpa 위임)
 - 테스트의 @TestConfiguration 부분 커멘트 처리하여 BasketRepositoryImpl 사용
 
+### JPA 테스트 실행을 위한 문제 해결
+- FakeRepository 관련 코드 완전 제거 (주석 처리된 코드, basketRepository 필드 등)
+- 테스트 클래스에 `@Transactional` 추가하여 Lazy Loading 문제 해결
+- `@ActiveProfiles("test")` 추가하여 테스트용 설정 분리
+- H2 테스트 데이터베이스 설정 추가 (application-test.yml)
+- BasketRepositoryJpa에 `@EntityGraph(attributePaths = {"items"})` 추가하여 N+1 문제 방지
+- application.properties를 application.yml로 변경
+
 ### Repository 클래스 다이어그램
 
 ```mermaid
@@ -222,5 +230,35 @@ classDiagram
     BasketRepositoryJpa <|-- JpaRepository : extends
     BasketRepositoryImpl --> BasketRepositoryJpa : uses
 ```
+
+## 9. **테스트 코드 리팩토링 (DSL 및 중복 제거)**
+
+### 테스트 코드 개선 작업 완료
+- 기존 테스트 코드의 중복과 가독성 문제 해결을 위해 DSL 패턴 적용
+- Test Data Builder와 Protocol Driver 패턴 도입으로 테스트 인프라 개선
+
+### Protocol Driver 패턴 적용
+- `BasketApi` 클래스로 MockMvc 호출을 캡슐화
+- 테스트 인프라 지식을 Protocol Driver에 격리
+- API 레벨에서 일관된 테스트 인터페이스 제공
+- 에러 케이스와 성공 케이스를 명확하게 분리한 메서드 제공
+
+### Test Data Builder 패턴 적용  
+- `BasketBuilder`와 `BasketItemBuilder` 클래스로 테스트 데이터 생성 추상화
+- `aBasket()`, `anItem()` 등의 DSL 스타일 팩토리 메서드 제공
+- Fluent Interface를 통한 직관적인 테스트 데이터 구성
+- 테스트 데이터 생성의 복잡성을 Builder 내부로 캡슐화
+
+### 중복 제거 및 가독성 향상
+- 반복되는 MockMvc 호출 패턴 완전 제거
+- 테스트의 given-when-then 구조가 더 명확하게 표현됨
+- 비즈니스 의도가 테스트 코드에서 직관적으로 드러남
+- 중복 테스트 케이스 식별 및 제거 (`create_and_verify_basket_with_discount` 삭제)
+
+### printBasketDetails 메서드 개선
+- 하드코딩된 String 반환에서 실제 BasketDetailsResponse 데이터 활용으로 변경
+- 동적 영수증 생성으로 각 테스트의 실제 데이터 검증
+- 천 단위 구분자와 할인율 계산 추가로 가독성 향상
+- 메서드가 전달받은 인자를 실제로 검증하고 활용하는 의미있는 구현
 
 ## 9. **테스트 코드 리팩토링**
