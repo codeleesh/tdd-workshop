@@ -65,6 +65,61 @@
 
 ## 3. **High Level Test 작성**
 
+### High Level Test 구현 완료
+- 대표 예제: 정확히 20,000원 - 10% 할인 적용 케이스
+- POST /api/baskets로 장바구니 생성 후 GET /api/baskets/{id}로 결과 확인
+- Approvals Test를 통한 영수증 형태 검증
+
+### 도메인 클래스 다이어그램
+
+```mermaid
+classDiagram
+    class Basket {
+        +Long id
+        +List~BasketItem~ items
+    }
+    
+    class BasketItem {
+        +String name
+        +BigDecimal price
+        +int quantity
+        +BigDecimal total
+    }
+    
+    class BasketItemRequests {
+        +List~BasketItemRequest~ items
+    }
+    
+    class BasketItemRequest {
+        +String name
+        +BigDecimal price
+        +int quantity
+    }
+    
+    class BasketResponse {
+        +String basketId
+    }
+    
+    class BasketDetailsResponse {
+        +String basketId
+        +List~BasketItemDto~ items
+        +BigDecimal subtotal
+        +BigDecimal discount
+        +BigDecimal finalAmount
+    }
+    
+    class BasketItemDto {
+        +String name
+        +int quantity
+        +BigDecimal price
+        +BigDecimal total
+    }
+    
+    Basket ||--o{ BasketItem : contains
+    BasketItemRequests ||--o{ BasketItemRequest : contains
+    BasketDetailsResponse ||--o{ BasketItemDto : contains
+```
+
 ## 4. **테스트 케이스 목록 작성**
 
 ## 5. **Walking Skeleton 구현**
