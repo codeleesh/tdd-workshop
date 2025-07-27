@@ -10,6 +10,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.annotation.Transactional;
+
+import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -25,15 +28,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /// - [X] 20,000원 이상 구매 시 10% 할인 적용
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
+@ActiveProfiles("test")
 public class CreateShoppingBasketTest {
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired
-    private BasketRepository basketRepository;
 
     @DisplayName("빈 장바구니에서 청구서 요청 시 예외 발생")
     @Test
@@ -229,38 +231,4 @@ public class CreateShoppingBasketTest {
             return new BasketItemRequest(name, price, quantity);
         }
     }
-
-    // @TestConfiguration
-    // static class TestConfig {
-    //     @Bean
-    //     public BasketRepository basketRepository() {
-    //         return new FakeBasketRepository();
-    //     }
-    // }
-
-    // static class FakeBasketRepository implements BasketRepository {
-    //     private final Map<Long, Basket> baskets = new ConcurrentHashMap<>();
-    //     private final AtomicLong idGenerator = new AtomicLong(1);
-
-    //     public Basket save(Basket basket) {
-    //         if (basket.getId() == null) {
-    //             Long id = idGenerator.getAndIncrement();
-    //             Basket savedBasket = new Basket(id, basket.getItems());
-    //             baskets.put(id, savedBasket);
-    //             return savedBasket;
-    //         } else {
-    //             baskets.put(basket.getId(), basket);
-    //             return basket;
-    //         }
-    //     }
-
-    //     public Optional<Basket> findById(Long id) {
-    //         return Optional.ofNullable(baskets.get(id));
-    //     }
-
-    //     public void clear() {
-    //         baskets.clear();
-    //         idGenerator.set(1);
-    //     }
-    // }
 }

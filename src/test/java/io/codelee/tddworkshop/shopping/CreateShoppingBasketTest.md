@@ -222,3 +222,5 @@ classDiagram
     BasketRepositoryJpa <|-- JpaRepository : extends
     BasketRepositoryImpl --> BasketRepositoryJpa : uses
 ```
+
+## 9. **테스트 코드 리팩토링**
