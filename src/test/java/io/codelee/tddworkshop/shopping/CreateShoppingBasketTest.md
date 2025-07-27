@@ -175,3 +175,50 @@ classDiagram
 ## 7. **High Level Test 활성화**
 
 ## 8. **Jpa Repository 구현**
+
+### Jpa Repository 구현 완료
+- Entity와 Value Object에 대해서 JPA 매핑 작성
+- BasketRepositoryJpa 인터페이스 생성 (JpaRepository 상속)
+- BasketRepositoryImpl 클래스 작성 (BasketRepository 구현, BasketRepositoryJpa 위임)
+- 테스트의 @TestConfiguration 부분 커멘트 처리하여 BasketRepositoryImpl 사용
+
+### Repository 클래스 다이어그램
+
+```mermaid
+classDiagram
+    class BasketRepository {
+        <<interface>>
+        +save(Basket) Basket
+        +findById(Long) Optional~Basket~
+    }
+    
+    class BasketRepositoryImpl {
+        -BasketRepositoryJpa basketRepositoryJpa
+        +save(Basket) Basket
+        +findById(Long) Optional~Basket~
+    }
+    
+    class BasketRepositoryJpa {
+        <<interface>>
+        +extends JpaRepository~Basket, Long~
+    }
+    
+    class FakeBasketRepository {
+        -Map~Long, Basket~ baskets
+        -AtomicLong idGenerator
+        +save(Basket) Basket
+        +findById(Long) Optional~Basket~
+        +clear() void
+    }
+    
+    class JpaRepository {
+        <<interface>>
+        +save(T) T
+        +findById(ID) Optional~T~
+    }
+    
+    BasketRepository <|.. BasketRepositoryImpl : implements
+    BasketRepository <|.. FakeBasketRepository : implements
+    BasketRepositoryJpa <|-- JpaRepository : extends
+    BasketRepositoryImpl --> BasketRepositoryJpa : uses
+```

@@ -2,25 +2,18 @@ package io.codelee.tddworkshop.shopping;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.approvaltests.Approvals;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.Optional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -41,14 +34,6 @@ public class CreateShoppingBasketTest {
 
     @Autowired
     private BasketRepository basketRepository;
-
-    @BeforeEach
-    void setup() {
-        // 테스트마다 저장소 초기화
-        if (basketRepository instanceof FakeBasketRepository) {
-            ((FakeBasketRepository) basketRepository).clear();
-        }
-    }
 
     @DisplayName("빈 장바구니에서 청구서 요청 시 예외 발생")
     @Test
@@ -96,6 +81,19 @@ public class CreateShoppingBasketTest {
                 aBasket()
                         .withItem(anItem("스마트폰 케이스").withPrice(15000))
                         .withItem(anItem("보호필름").withPrice(5000))
+        );
+
+        // when & then
+        BasketDetailsResponse basketDetails = basketApi.getBasketDetails(basketId);
+        Approvals.verify(printBasketDetails(basketDetails));
+    }
+
+    @DisplayName("엔드-투-엔드 기능 구현: UI부터 데이터베이스까지 전체 시스템을 관통하는 기본적인 흐름 포함")
+    @Test
+    void walking_skeleton_shopping_basket() throws Exception {
+        // given
+        String basketId = basketApi.createBasket(
+                aBasket().withItem(anItem("충전 케이블").withPrice(8000))
         );
 
         // when & then
@@ -232,38 +230,37 @@ public class CreateShoppingBasketTest {
         }
     }
 
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public BasketRepository basketRepository() {
-            return new FakeBasketRepository();
-        }
-    }
+    // @TestConfiguration
+    // static class TestConfig {
+    //     @Bean
+    //     public BasketRepository basketRepository() {
+    //         return new FakeBasketRepository();
+    //     }
+    // }
 
-    static class FakeBasketRepository implements BasketRepository {
-        private final Map<Long, Basket> baskets = new ConcurrentHashMap<>();
-        private final AtomicLong idGenerator = new AtomicLong(1);
+    // static class FakeBasketRepository implements BasketRepository {
+    //     private final Map<Long, Basket> baskets = new ConcurrentHashMap<>();
+    //     private final AtomicLong idGenerator = new AtomicLong(1);
 
-        public Basket save(Basket basket) {
-            if (basket.getId() == null) {
-                Long id = idGenerator.getAndIncrement();
-                Basket savedBasket = new Basket(id, basket.getItems());
-                baskets.put(id, savedBasket);
-                return savedBasket;
-            } else {
-                baskets.put(basket.getId(), basket);
-                return basket;
-            }
-        }
+    //     public Basket save(Basket basket) {
+    //         if (basket.getId() == null) {
+    //             Long id = idGenerator.getAndIncrement();
+    //             Basket savedBasket = new Basket(id, basket.getItems());
+    //             baskets.put(id, savedBasket);
+    //             return savedBasket;
+    //         } else {
+    //             baskets.put(basket.getId(), basket);
+    //             return basket;
+    //         }
+    //     }
 
-        public Optional<Basket> findById(Long id) {
-            return Optional.ofNullable(baskets.get(id));
-        }
+    //     public Optional<Basket> findById(Long id) {
+    //         return Optional.ofNullable(baskets.get(id));
+    //     }
 
-        public void clear() {
-            baskets.clear();
-            idGenerator.set(1);
-        }
-    }
+    //     public void clear() {
+    //         baskets.clear();
+    //         idGenerator.set(1);
+    //     }
+    // }
 }
-
